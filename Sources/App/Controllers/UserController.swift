@@ -1,22 +1,22 @@
+import Vapor
+
 final class UserController {
-  let drop: Droplet
-  
-  init(drop: Droplet) {
-    self.drop = drop
-  }
-  
-  func list(_ req: Request) throws -> ResponseRepresentable {
-    let list = try User.all()
-    return try drop.view.make("userview", ["userlist": list.makeNode(in: nil)])
-  }
-  
-  func create(_ req: Request) throws -> ResponseRepresentable {
-    guard let username = req.data["username"]?.string else {
-      return Response(status: .badRequest)
+
+    func list(_ req: Request) throws -> Future<View> {
+        let allUsers = User.query(on: req).all()
+
+        return allUsers.flatMap(to: View.self) { users in
+            let data = ["userlist": users]
+            return try req.view().render("userview", data)
+        }
     }
-    
-    let user = User(username: username)
-    try user.save()
-    return Response(redirect: "/user")
-  }
+
+    func create(_ req: Request) throws -> Future<Response> {
+        let user = try req.content.decode(User.self)
+
+        return user.map(to: Response.self) { user in
+            _ = user.save(on: req)
+            return req.redirect(to: "users")
+        }
+    }
 }

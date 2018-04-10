@@ -14,8 +14,7 @@ final class UserController {
     func create(_ req: Request) throws -> Future<Response> {
         let user = try req.content.decode(User.self)
 
-        return user.map(to: Response.self) { user in
-            _ = user.save(on: req)
+        return user.save(on: req).map(to: Response.self) { _ in
             return req.redirect(to: "users")
         }
     }

@@ -14,7 +14,7 @@ public func configure(
     try routes(router)
     services.register(router, as: Router.self)
 
-    let myService = NIOServerConfig.default(port: 8003)
+    let myService = NIOServerConfig.default(port: 8004)
     services.register(myService)
 
     let leafProvider = LeafProvider()
